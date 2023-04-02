@@ -100,6 +100,7 @@ class _IntroPageState extends State<IntroPage> {
                         children: <Widget>[
                           TextField(
                             controller: emailController,
+                            autocorrect: false,
                             decoration: InputDecoration(
                               label: const Text('Email'),
                               floatingLabelStyle: TextStyle(

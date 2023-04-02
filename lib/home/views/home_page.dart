@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:jacopo_flutter_test/hive/widgets/hive_item.dart';
+import 'package:jacopo_flutter_test/apiary/bloc/apiaries_bloc.dart';
+import 'package:jacopo_flutter_test/apiary/cubit/apiaries_counter_cubit.dart';
+import 'package:jacopo_flutter_test/hive/bloc/hives_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jacopo_flutter_test/hive/widgets/hives_list.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/home';
@@ -11,39 +15,54 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
+  void initState() {
+    super.initState();
+    context.read<ApiariesBloc>().add(FetchApiaries());
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.width - 40,
-                child: PageView.builder(
-                  scrollDirection: Axis.horizontal,
-                  controller: PageController(
-                    viewportFraction: 1,
-                    initialPage: 0,
+      body: BlocListener<ApiariesBloc, ApiariesState>(
+        listener: (context, state) {
+          if (state is ApiariesLoaded && state.apiaries.isNotEmpty) {
+            context
+                .read<ApiariesCounterCubit>()
+                .initApiariesCounter(apiariesLenght: state.apiaries.length);
+            context.read<HivesBloc>().add(
+                  FetchHives(
+                    apiaryId: state.apiaries[0].id,
+                    isLoadMore: false,
                   ),
-                  itemCount: 5,
-                  itemBuilder: (context, index) {
-                    return const HiveItem();
-                  },
-                ),
-              ),
-              TabPageSelector(
-                controller: TabController(
-                  length: 5,
-                  vsync: this,
-                  initialIndex: 0,
-                ),
-                color: const Color.fromRGBO(123, 121, 134, 1),
-                selectedColor: Colors.white,
-                indicatorSize: 8,
-              ),
-            ],
+                );
+          }
+        },
+        listenWhen: (previous, current) => previous is ApiariesLoading,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: BlocBuilder<ApiariesBloc, ApiariesState>(
+              builder: (context, apiariesState) {
+                if (apiariesState is ApiariesLoaded) {
+                  return BlocBuilder<HivesBloc, HivesState>(
+                    builder: (context, hivesState) {
+                      if (hivesState is HivesLoaded) {
+                        return HivesList(
+                          apiaries: apiariesState.apiaries,
+                          hives: hivesState.hives,
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  );
+                } else if (apiariesState is ApiariesLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
       ),

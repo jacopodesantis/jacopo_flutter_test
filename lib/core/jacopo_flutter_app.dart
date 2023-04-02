@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jacopo_flutter_test/apiary/bloc/apiaries_bloc.dart';
+import 'package:jacopo_flutter_test/apiary/cubit/apiaries_counter_cubit.dart';
 import 'package:jacopo_flutter_test/hive/bloc/hives_bloc.dart';
 import 'package:jacopo_flutter_test/home/views/home_page.dart';
 import 'package:jacopo_flutter_test/intro/views/intro_page.dart';
@@ -17,13 +19,23 @@ class JacopoFlutterApp extends StatelessWidget {
     List<NavigatorObserver> navigatorObservers = const [],
   }) {
     final Map<String, Widget Function(BuildContext)> routes = {
-      HomePage.routeName: (ctx) => BlocProvider(
-            create: RepositoryProvider.of<BlocCreator<HivesBloc>>(ctx),
+      HomePage.routeName: (ctx) => MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: RepositoryProvider.of<BlocCreator<ApiariesBloc>>(ctx),
+              ),
+              BlocProvider(
+                create: RepositoryProvider.of<BlocCreator<HivesBloc>>(ctx),
+              ),
+              BlocProvider(
+                create: (context) => ApiariesCounterCubit(),
+              ),
+            ],
             child: const HomePage(),
           ),
     };
     return MaterialApp(
-      title: 'Mac Fondenti App',
+      title: '3 Bee App',
       navigatorKey: JacopoFlutterApp.navigatorKey,
       builder: (context, child) {
         return MediaQuery(
@@ -74,16 +86,16 @@ class JacopoFlutterApp extends StatelessWidget {
             color: Colors.black,
           ),
           headline3: TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
           bodyText1: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+            fontSize: 28,
+            color: Colors.white,
           ),
           bodyText2: TextStyle(
-            fontSize: 28,
+            fontSize: 30,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),

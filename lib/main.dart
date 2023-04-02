@@ -17,20 +17,31 @@ class DependencyProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Builder(
-      builder: (context) {
-        return MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (ctx) => InjectorWidget.of(context).getUserBloc(),
-            ),
-            BlocProvider(
-              create: (ctx) => InjectorWidget.of(context).getHivesBloc(),
-            ),
-          ],
-          child: const JacopoFlutterApp(),
-        );
-      },
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(
+          value: (BuildContext ctx) {
+            return InjectorWidget.of(context).getApiariesBloc();
+          },
+        ),
+        RepositoryProvider.value(
+          value: (BuildContext ctx) {
+            return InjectorWidget.of(context).getHivesBloc();
+          },
+        ),
+      ],
+      child: Builder(
+        builder: (context) {
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (ctx) => InjectorWidget.of(context).getUserBloc(),
+              ),
+            ],
+            child: const JacopoFlutterApp(),
+          );
+        },
+      ),
     );
   }
 }

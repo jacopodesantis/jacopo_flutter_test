@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:jacopo_flutter_test/apiary/bloc/apiaries_bloc.dart';
+import 'package:jacopo_flutter_test/apiary/service/apiary_service.dart';
 import 'package:jacopo_flutter_test/core/auth_interceptor.dart';
 import 'package:jacopo_flutter_test/core/jacopo_api_client.dart';
 import 'package:jacopo_flutter_test/core/storage_repository.dart';
@@ -24,6 +26,7 @@ class InjectorWidget extends InheritedWidget {
   static late StorageRepository storageRepository;
   static late UserBloc _userBloc;
   static late UserService userService;
+  static late ApiariesService apiariesService;
   static late HivesService hivesService;
 
   init() async {
@@ -37,6 +40,7 @@ class InjectorWidget extends InheritedWidget {
     jacopoApiClient = JacopoApiClient(dio: dio);
     storageRepository = StorageRepository();
     userService = UserService(jacopoApiClient);
+    apiariesService = ApiariesService(jacopoApiClient);
     hivesService = HivesService(jacopoApiClient);
     _userBloc = UserBloc(userService, storageRepository);
 
@@ -49,6 +53,10 @@ class InjectorWidget extends InheritedWidget {
 
   UserBloc getUserBloc() {
     return _userBloc;
+  }
+
+  ApiariesBloc getApiariesBloc() {
+    return ApiariesBloc(apiariesService);
   }
 
   HivesBloc getHivesBloc() {

@@ -7,4 +7,15 @@ abstract class HivesEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class FetchHives extends HivesEvent {}
+class FetchHives extends HivesEvent {
+  final int apiaryId;
+  final bool isLoadMore;
+
+  const FetchHives({
+    required this.apiaryId,
+    required this.isLoadMore,
+  });
+
+  @override
+  List<Object> get props => [apiaryId, isLoadMore];
+}
