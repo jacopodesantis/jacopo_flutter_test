@@ -24,6 +24,10 @@ class HiveItem extends StatelessWidget {
           image: DecorationImage(
             image: NetworkImage(hive.image),
             fit: BoxFit.cover,
+            colorFilter: const ColorFilter.mode(
+              Colors.black54,
+              BlendMode.darken,
+            ),
           ),
           border: Border.all(
             color: apiary.color,

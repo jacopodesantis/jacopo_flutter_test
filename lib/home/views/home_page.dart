@@ -23,6 +23,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10.0),
+          child: Image.asset(
+            'assets/images/3bee_logo.png',
+            fit: BoxFit.contain,
+          ),
+        ),
+        leadingWidth: 100,
+      ),
       body: BlocListener<ApiariesBloc, ApiariesState>(
         listener: (context, state) {
           if (state is ApiariesLoaded && state.apiaries.isNotEmpty) {

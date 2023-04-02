@@ -1,5 +1,6 @@
 import 'package:jacopo_flutter_test/core/jacopo_api_client.dart';
 import 'package:jacopo_flutter_test/core/jacopo_request.dart';
+import 'package:jacopo_flutter_test/core/jacopo_response.dart';
 import 'package:jacopo_flutter_test/core/jacopo_service.dart';
 import 'package:jacopo_flutter_test/error/model/error.dart';
 import 'package:jacopo_flutter_test/user/dto/user_login_response_dto.dart';
@@ -17,10 +18,12 @@ class UserService extends JacopoService {
     return EitherError.error(response.error!.message);
   }
 
-  Future<EitherError<UserLoginResponseDTO>> verifyToken(
+  Future<EitherError<SimpleResponse<bool>>> verifyToken(
       JacopoRequest request) async {
     final response = await client.postRequest(
-        request, (json) => UserLoginResponseDTO.fromJson(json));
+        request, (json) => SimpleResponse.fromValue(false),
+        orElse: (response) =>
+            SimpleResponse.fromValue(response.statusCode == 200));
 
     if (!response.hasFailed && response.value != null) {
       return EitherError.value(response.value!);

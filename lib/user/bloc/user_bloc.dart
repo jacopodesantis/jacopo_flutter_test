@@ -13,6 +13,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   final StorageRepository _storage;
 
   String? token;
+  String? refreshToken;
 
   UserBloc(
     this.userService,
@@ -41,15 +42,17 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     final storageToken = await _storage.read('token');
     final storageRefresh = await _storage.read('refresh');
     token = storageToken;
+    refreshToken = storageRefresh;
     if (storageToken != null && storageRefresh != null) {
-      final user = await _verifyToken(storageToken);
-      if (user != null) {
+      final result = await _verifyToken(storageToken);
+      if (result != null) {
         emit(UserAuthenticated(token: storageToken));
       } else {
         emit(UserUnauthenticated());
       }
+    } else {
+      emit(UserUnauthenticated());
     }
-    emit(UserUnauthenticated());
   }
 
   Future<String?> _verifyToken(String token) async {
@@ -67,6 +70,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   Future<void> _loginUser(Emitter<UserState> emit, UserLoggingIn event) async {
     String? token;
+    String? refresh;
     emit(UserLoading());
     try {
       var result = await userService.login(
@@ -77,9 +81,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       );
       if (!result.hasFailed && result.value != null) {
         token = result.value!.token;
-        if (token != '') {
-          await _deleteToken();
+        refresh = result.value!.refresh;
+        if (token != '' && refresh != '') {
+          await _deleteTokens();
           await _writeToken(token);
+          await _writeRefresh(refresh);
           emit(UserAuthenticated(token: token));
         } else {
           emit(
@@ -103,20 +109,27 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   //   emit(UserAuthenticated(token: newToken));
   // }
 
-  Future<void> _deleteToken() async {
+  Future<void> _deleteTokens() async {
     await _storage.delete('token');
+    await _storage.delete('refresh');
     token = null;
+    refreshToken = null;
   }
 
-  Future<void> _writeToken(String token) async {
-    await _storage.write('token', token);
-    token = token;
+  Future<void> _writeToken(String tokenToWrite) async {
+    await _storage.write('token', tokenToWrite);
+    token = tokenToWrite;
+  }
+
+  Future<void> _writeRefresh(String tokenToWrite) async {
+    await _storage.write('refresh', tokenToWrite);
+    refreshToken = tokenToWrite;
   }
 
   Future<void> _logoutUser(Emitter<UserState> emit) async {
     emit(UserLogoutLoading());
 
-    await _deleteToken();
+    await _deleteTokens();
     emit(UserUnauthenticated());
   }
 }
